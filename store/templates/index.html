@@ -1,24 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>E-shop</title>
-</head>
-<body>
-<h1>{{products}}</h1>
+{% extends 'base.html' %}
 
-{% for product in products %}
+{% block content %}
 
-<table>
-    <tr>
-        <td>{{product.name}}</td>
-        <td>:   {{product.category}}</td>
-        <td>:   {{product.price}}</td>
-        <td>:   {{product.image}}</td>
-    </tr>
+{% load cart %}
+<div class="container-fluid mt-3">
+<div class="row">
+  <!--filter(categories)-->
+  <div class="col-lg-3 mx-auto"><!--add mx auto-->
+    <div class="list-group">
+      <a href="/" class="list-group-item list-group-item-action border-2">All Products</a>
+      {% for category in categories %}
+     <!--this /?category={{category.id}} is used get the cate id of the component--> <a href="/?category={{category.id}}" class="list-group-item list-group-item-action  border-2">{{category.name}}</a>
 
-</table>
+      {% endfor %}
+    </div>
+  </div>
 
-{% endfor %}
-</body>
-</html>
+  <div id='products' class="col-lg-8 mx auto"><!--mx auto-->
+    <div class="row mx-auto">
+      {% for product in products %}
+      <div class="card mx-auto mb-3" style="width: 18rem;">
+        <img src="{{product.image.url}}" class="card-img-top" alt="..."> <!--this .url is added to show the images static files-->
+        <div class="card-body">
+          <p class="card-title">{{product.name}}</p>
+          <p class="card-text"><b>{{product.price}}</b></p>
+          
+          <!--<small>{{product.image.url}}</small>--> <!--this line is used for reference to the urls in the front end-->
+          <!-- {{product | is_in_cart:request.session.cart }} -->
+        </div>
+      <div class="card-footer p-0 no-gutters">
+        
+        {% if product|is_in_cart:request.session.cart %}
+          <div class="row no-gutters">
+            <form action="/" class="col-2" method="POST">
+              {% csrf_token%}            
+              <input hidden type="text" name="product" value="{{product.id}}">
+              <input hidden type="text" name="remove" value="True">
+              <input type="submit" value=" - " class="btn btn block btn-light border-right">
+            </form>
+
+            <div class="text-center col">{{product|cart_quantity:request.session.cart}} in cart</div>
+              <form action="/" class="col-2" method="POST">
+                {% csrf_token%}
+                <input hidden type="text" name="product" value="{{product.id}}"> 
+                <input type="submit" value=" + " class="btn btn block btn-light border-left">
+              </form>
+          </div>
+          
+        {% else %}
+            <form action="/" method="POST" class="btn-block">
+              {% csrf_token%}
+              <input hidden type="text" name="product" value="{{product.id}}">
+              <input  type ="submit" class="float-right btn btn-light border form-control" value ="Add To Cart">
+            </form>
+        {% endif %}
+      </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+</div>  
+
+
+
+
+{% endblock %}
+
+
+
+
